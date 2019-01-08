@@ -1,0 +1,112 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Real-time audio-video acquisition and audio-image processing</title>
+<style type="text/css">
+<!--
+.style2 {color: #990000}
+.style3 {color: #00CC00}
+.style4 {color: #000099}
+.style6 {color: #00CC00; font-weight: bold; }
+.style8 {color: #990000; font-weight: bold; }
+.style10 {color: #000099; font-weight: bold; }
+.style11 {
+	font-style: italic;
+	font-size: 18px;
+	color: #003300;
+}
+.style14 {font-size: 18px}
+.style15 {
+	font-size: 12px;
+}
+.style16 {
+	font-size: 18px;
+	font-weight: bold;
+	color: #003300;
+}
+.style17 {
+	color: #009900;
+	font-weight: bold;
+	font-size: 24px;
+}
+.style18 {font-size: 18px; color: #003300; }
+-->
+</style>
+</head>
+
+<body>
+
+<table width="100%" border="1">
+  <tr>
+    <td width="80%" class="style14"><span class="style17">Real Time Microphone and Camera data acquisition and audio-video processing</span></td>
+    <td width="20%" class="style15"><font color="#003333"><strong>Theodoros Giannakopoulos </strong><br>
+Department of Informatics and Telecommunications <br>
+Univarsity of Athens, Greece <br>
+<strong>website:</strong></font> <strong><a href="http://www.di.uoa.gr/~tyiannak" target="_blank">www.di.uoa.gr/~tyiannak</a></strong></td>
+  </tr>
+</table>
+<p align="center" class="style18"><strong>General</strong></p>
+<p class="style18">The current Matlab-code can be used for real-time audio and image processing. Fixed-length segments of audio data are recorded from soundcard's input and an image is also captured in each block. In particular, the provided code does the following:</p>
+<table width="50%" border="1" align="center">
+  <tr>
+    <td width="20%" rowspan="5" class="style14"><span class="style10">AUDIO</span></td>
+    <td width="80%" class="style14"><span class="style4">Repetively records audio segments of fixed length.</span></td>
+  </tr>
+  <tr>
+    <td class="style14"><span class="style4">Plots the (applitude) values of the current audio segment.</span></td>
+  </tr>
+  <tr>
+    <td class="style14"><span class="style4">Plots the spectogram of the current audio segment.</span></td>
+  </tr>
+  <tr>
+    <td class="style14"><span class="style4">Calculates the mean and std values of the Zero Crossing Rate for each segment, and plots those statistics for the last five segments.</span></td>
+  </tr>
+  <tr>
+    <td class="style14"><span class="style4">Calculates and plots the average spectral distance between the current and the previous audio segment. This is actually <em>a simple measure of change detection in the audio information</em>.</span></td>
+  </tr>
+  <tr>
+    <td rowspan="3" class="style14"><span class="style8">VIDEO</span></td>
+    <td class="style14"><span class="style2">Captures and plots an image for each block (frame).</span></td>
+  </tr>
+  <tr>
+    <td class="style14"><span class="style2">Plots an estimation of the motion between the current and the previous frames.</span></td>
+  </tr>
+  <tr>
+    <td class="style14"><span class="style2">Plots the average absolute difference between two successive frames.</span></td>
+  </tr>
+  <tr>
+    <td class="style14"><span class="style6">OTHER</span></td>
+    <td class="style14"><span class="style3">Calculates and displays the ratio of the processing time (for the feature calculation and the plotting processes) by the real signal data.</span></td>
+  </tr>
+</table>
+<p class="style14">&nbsp;</p>
+<p align="center" class="style16">Requirements:</p>
+<p class="style18">I have tried the demo in <strong>Matlab2007b</strong>. I have also tried it in Matlab 6.5 and it seems that there are some problems with the acquisition functions (in particular with the audio acquisition): half of the times the getdata() call (line 171) fails.</p>
+<p align="center" class="style18"><strong>Provided M-files:</strong></p>
+<table width="100%" border="0">
+  <tr>
+    <td width="10%" class="style18">realTimeMic.m</td>
+    <td width="90%" class="style18">This is the main m-file. It reads blocks (of fixed length) of audio information and it captures one image (from an attached camera) per block.</td>
+  </tr>
+  <tr>
+    <td class="style18">zcr.m</td>
+    <td class="style18">This function computes the Zero Crossing Rate of an audio signal in a short-term basis (i.e. one value of the ZCR function is calculated per frame).</td>
+  </tr>
+</table>
+<p class="style18">&nbsp;</p>
+<p align="center" class="style18"><strong>Example</strong></p>
+<p class="style18">In order to execute the demo, simply call the realTimeMic function with the following arguments:</p>
+<p class="style18"><strong>duration:</strong> (in seconds) the duration of each audio segment (and the time interval between two succcesive images taken from cam).</p>
+<p class="style18"><strong>nBlocks:</strong>   number of blocks to be recorded<br>
+</p>
+<p class="style18"><strong>useVideo:</strong>  1 for recording video and 0 otherwise</p>
+<p class="style18">For example write:</p>
+<p class="style18"><em>realTimeMic(1.0,100,1);</em></p>
+<p class="style18">in the Matlab workspace. This will run the demo for 100 segments of 1.0 second each, and it will use the camera (it has to be attached) for capturing images.<br>
+</p>
+<p class="style18">In Figure 1, a screenshot of the demo is displayed.</p>
+<p class="style18"><img src="screen.jpg" width="1152" height="758"></p>
+<p class="style11"><strong>Figure 1:</strong> A screenshot of the demo. In the <strong>first</strong> row the subplots display: <strong>1) </strong>the audio signal's amplitude (current segment) <strong>2)</strong> the mean and std values of the ZCR for the last five segments <strong>3)</strong> the current segment's spectogram and <strong>4)</strong> the average distance (absolute value) between the spectograms of the current and the previous segments (this is a measure of changes between 2 successive segments). In the second row the subplots display: <strong>1)</strong> The currently captured image <strong>2)</strong> the motion estimation <strong>3)</strong> The ratio (%) of the processing by duration and <strong>4)</strong> The average distance between two succesive frames.</p>
+<p class="style18">&nbsp;</p>
+</body>
+</html>

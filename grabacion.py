@@ -1,28 +1,72 @@
+"""Real time plotting of Microphone level using kivy
+"""
+
+from kivy.lang import Builder
+from kivy.app import App
+from kivy.uix.boxlayout import BoxLayout
+from kivy.garden.graph import MeshLinePlot
+from kivy.clock import Clock
+from threading import Thread
+from kivy.config import Config
+from kivy.properties import NumericProperty
+import audioop
 import pyaudio
-import numpy as np
-import pylab
-import time
-RATE = 44100
-CHUNK = int(RATE/20)  # RATE / number of updates per second
+Config.set('graphics', 'fullscreen', '0')  # Deactivates fullscreen
 
 
-def soundplot(stream):
-    t1 = time.time()
-    data = np.fromstring(stream.read(CHUNK), dtype=np.int16)
-    pylab.plot(data)
-    pylab.title(i)
-    pylab.grid()
-    pylab.axis([0, len(data), -2**16/2, 2**16/2])
-    pylab.savefig("03.png", dpi=50)
-    pylab.close('all')
-    print("took %.02f ms" % ((time.time()-t1)*1000))
+def get_microphone_level():
+    """
+    source: http://stackoverflow.com/questions/26478315/getting-volume-levels-from-pyaudio-for-use-in-arduino
+    audioop.max alternative to audioop.rms
+    """
+    chunk = 1024
+    FORMAT = pyaudio.paInt16
+    CHANNELS = 1
+    RATE = 44100
+    p = pyaudio.PyAudio()
 
+    s = p.open(format=FORMAT,
+               channels=CHANNELS,
+               rate=RATE,
+               input=True,
+               frames_per_buffer=chunk)
+    global levels
+    while True:
+        data = s.read(chunk)
+        mx = audioop.rms(data, 2)
+        if len(levels) >= 100:
+            levels = []
+        levels.append(mx)
+
+
+class Logic(BoxLayout):
+
+    counter = NumericProperty(0)
+
+    def __init__(self,):
+        super(Logic, self).__init__()
+        self.plot = MeshLinePlot(color=[1, 0, 0, 1])
+
+    def start(self):
+        self.ids.graph.add_plot(self.plot)
+        Clock.schedule_interval(self.get_value, 0.001)
+
+    def stop(self):
+        Clock.unschedule(self.get_value)
+        print(self.counter)
+        self.counter = 0
+
+    def get_value(self, dt):
+        self.plot.points = [(i, j/5) for i, j in enumerate(levels)]
+        self.counter = self.counter + 1
+
+class RealTimeMicrophone(App):
+    def build(self):
+        return Builder.load_file("look.kv")
 
 if __name__ == "__main__":
-    p = pyaudio.PyAudio()
-    stream = p.open(format=pyaudio.paInt16, channels=1, rate=RATE, input=True,
-                    frames_per_buffer=CHUNK)
-    for i in range(int(20*RATE/CHUNK)):  # do this for 10 seconds
-        soundplot(stream)
-    stream.stop_stream()
-    stream.close()
+    levels = []  # store levels of microphone
+    get_level_thread = Thread(target = get_microphone_level)
+    get_level_thread.daemon = True
+    get_level_thread.start()
+    RealTimeMicrophone().run()
